@@ -1,6 +1,6 @@
 # IMDb List Relay API
 
-A lightweight relay server designed to scrape IMDb movie lists and serve the data in a JSON format compatible with Radarr (or other media managers).
+A lightweight relay server designed to scrape IMDb movie lists and serve the data in a JSON format compatible with Radarr as a StevenLu Custom List.
 
 ## Features
 - Scrapes IMDb lists using the `__NEXT_DATA__` JSON block for high reliability.
