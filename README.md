@@ -4,24 +4,15 @@ A lightweight relay server designed to scrape IMDb movie lists and serve the dat
 
 ## Features
 - Scrapes IMDb lists using the `__NEXT_DATA__` JSON block for high reliability.
-- Returns clean JSON with movie titles, years, IMDb IDs, and poster URLs.
+- Returns clean JSON with movie title and year, IMDb ID, and poster URL.
 - Built with FastAPI for high performance.
 - Easy to run as a systemd service.
-
-## API Endpoints
-
-### `GET /list/{list_id}`
-Returns the list of movies for the given IMDb list ID.
-- **Example**: `GET /list/ls031657324`
-
-### `GET /`
-Health check endpoint.
 
 ## Adding to Radarr
 
 You can use this relay to add IMDb lists to Radarr as a "StevenLu Custom" list.
 
-1. In Radarr, navigate to **Settings** > **Lists**.
+1. In Radarr, navigate to **Settings** > **Import Lists**.
 2. Click the **+** button to add a new list.
 3. Select **StevenLu Custom** from the available options.
 4. Configure the following:
@@ -37,8 +28,8 @@ You can use this relay to add IMDb lists to Radarr as a "StevenLu Custom" list.
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/imdb_scraper_api.git
-   cd imdb_scraper_api
+   git clone https://github.com/mattswest/imdb_list_relay_api
+   cd imdb_list_relay_api
    ```
 
 2. **Create and activate a virtual environment**:
