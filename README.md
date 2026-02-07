@@ -42,7 +42,7 @@ You can use this relay to add IMDb lists to Radarr as a "StevenLu Custom" list.
 6. Click **Test** to ensure Radarr can reach the relay and parse the list.
 7. Click **Save**.
 
-## Technologies Used
+## Software Used
 - **Python 3**
 - **FastAPI**
 - **BeautifulSoup4**
