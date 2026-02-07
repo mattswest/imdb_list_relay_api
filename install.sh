@@ -32,18 +32,27 @@ echo "[+] Installing dependencies..."
 "$PYTHON_EXEC" -m pip install --upgrade pip > /dev/null
 "$PYTHON_EXEC" -m pip install -r requirements.txt
 
-# 3. Configure Service File
-echo "[+] Configuring systemd service file..."
+# 3. Create Service File
+echo "[+] Creating systemd service file..."
 SERVICE_FILE="imdb-relay.service"
 
-# Use sed to replace User, WorkingDirectory, and ExecStart
-# We use | as delimiter to avoid conflicts with slashes in paths
-sed -i "s|^User=.*|User=$CURRENT_USER|" "$SERVICE_FILE"
-sed -i "s|^WorkingDirectory=.*|WorkingDirectory=$PROJECT_DIR|" "$SERVICE_FILE"
-sed -i "s|^ExecStart=.*|ExecStart=$PYTHON_EXEC main.py|" "$SERVICE_FILE"
+cat <<EOF > "$SERVICE_FILE"
+[Unit]
+Description=IMDb List Relay API for Radarr
+After=network.target
 
-echo "[*] Service file updated with:"
-grep -E "User=|WorkingDirectory=|ExecStart=" "$SERVICE_FILE"
+[Service]
+User=$CURRENT_USER
+WorkingDirectory=$PROJECT_DIR
+ExecStart=$PYTHON_EXEC main.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+echo "[*] Service file created."
 
 # 4. Install Service
 echo "[+] Installing systemd service (requires sudo)..."
