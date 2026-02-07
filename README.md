@@ -32,38 +32,21 @@ You can use this relay to add IMDb lists to Radarr as a "StevenLu Custom" list.
    cd imdb_list_relay_api
    ```
 
-2. **Create and activate a virtual environment**:
+2. **Run the installer**:
    ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
+   ./install.sh
    ```
+   This script will:
+   - Create a Python virtual environment.
+   - Install all dependencies.
+   - Configure and install the systemd service automatically.
 
-3. **Install dependencies**:
+3. **Verify**:
+   Check that the service is running:
    ```bash
-   pip install -r requirements.txt
+   sudo systemctl status imdb-relay
    ```
-
-4. **Run the server**:
-   ```bash
-   python main.py
-   ```
-   The server will start on port `9191`.
-
-## Running as a Service (Linux)
-
-A systemd service file `imdb-relay.service` is provided. To use it:
-
-1. Edit the `User`, `WorkingDirectory`, and `ExecStart` paths in `imdb-relay.service` to match your environment. Ensure `ExecStart` points to the python executable in your virtual environment (e.g., `/path/to/imdb_scraper_api/.venv/bin/python`).
-2. Link or copy the service file:
-   ```bash
-   sudo ln -s /path/to/imdb-relay.service /etc/systemd/system/
-   ```
-3. Start and enable the service:
-   ```bash
-   sudo systemctl daemon-reload
-   sudo systemctl enable imdb-relay
-   sudo systemctl start imdb-relay
-   ```
+   The server listens on port `9191` by default.
 
 ## Technologies Used
 - **Python 3**
