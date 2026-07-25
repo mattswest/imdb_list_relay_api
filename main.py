@@ -1,4 +1,6 @@
 import json
+import os
+import tempfile
 import time
 from pathlib import Path
 from fastapi import FastAPI, HTTPException
@@ -9,6 +11,26 @@ app = FastAPI(title="IMDb List Relay API")
 CACHE_DIR = Path("cache")
 CACHE_DIR.mkdir(exist_ok=True)
 CACHE_DURATION = 86400  # 24 hours in seconds
+
+
+def write_cache(cache_file: Path, movies):
+    """Atomically replace a cache entry after a complete scrape."""
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            dir=CACHE_DIR,
+            prefix=f".{cache_file.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as temporary_file:
+            temporary_path = Path(temporary_file.name)
+            json.dump(movies, temporary_file)
+        os.replace(temporary_path, cache_file)
+    finally:
+        if temporary_path and temporary_path.exists():
+            temporary_path.unlink()
+
 
 @app.get("/list/{list_id}")
 async def get_list(list_id: str):
@@ -31,14 +53,12 @@ async def get_list(list_id: str):
 
     try:
         movies = scrape_imdb_list(list_id)
-        
-        # Save to cache
+
         try:
-            with open(cache_file, "w") as f:
-                json.dump(movies, f)
+            write_cache(cache_file, movies)
         except Exception as e:
             print(f"Failed to write cache for {list_id}: {e}")
-            
+
         return movies
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
