@@ -1,0 +1,6 @@
+-r requirements.txt
+
+# Test-only dependencies. Deliberately kept out of requirements.txt so the
+# systemd service installs nothing it does not need at runtime.
+pytest
+httpx

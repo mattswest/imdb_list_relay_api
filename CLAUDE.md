@@ -15,6 +15,8 @@ This project is a relay server that retrieves IMDb movie lists through IMDb's Gr
 - `tests/test_scraper.py`: Covers pagination, ordering, output shape, nullable metadata, and upstream failure handling without relying on live IMDb responses.
 - `tests/test_main.py`: Covers successful and failed cache behavior.
 - `imdb-relay.service`: A systemd unit file for managing the application as a background service.
+- `install-sudoers.sh`: Installs a sudoers drop-in granting `matt` passwordless restart of this one unit. Every value is hardcoded; it refuses to run as non-root and validates with `visudo` before installing.
+- `requirements-dev.txt`: Test-only dependencies (`pytest`, `httpx`), kept separate so the service installs nothing it does not need at runtime.
 
 ## Building and Running
 
@@ -36,11 +38,27 @@ python main.py
 The server defaults to port **9191**.
 
 ### Running as a Service
-The project is configured to run as a systemd service:
+The project is configured to run as a systemd service (`User=matt`, `Restart=always`, `RestartSec=5`):
 - **Start**: `sudo systemctl start imdb-relay`
 - **Stop**: `sudo systemctl stop imdb-relay`
+- **Restart**: `sudo -n systemctl restart imdb-relay`
 - **Status**: `sudo systemctl status imdb-relay`
 - **Logs**: `journalctl -u imdb-relay -f`
+
+### Deploying Code Changes
+The service imports `main.py` once at startup, so **source edits have no effect until the unit is restarted**. A stale process keeps serving old behaviour and old error strings long after the code is fixed; this previously surfaced as Radarr receiving HTTP 500 `Could not find __NEXT_DATA__ script tag` from a months-old process while the repository already contained the GraphQL fix.
+```bash
+sudo -n systemctl restart imdb-relay
+```
+Always confirm the process was actually replaced rather than assuming the restart worked:
+```bash
+systemctl show imdb-relay -p MainPID -p ActiveEnterTimestamp
+```
+
+### Passwordless Restart
+`sudo ./install-sudoers.sh` installs `/etc/sudoers.d/imdb-relay-restart`, granting `matt` NOPASSWD rights to restart this unit only (both the `imdb-relay` and `imdb-relay.service` spellings, because sudo matches the command line literally).
+
+When verifying that rule, run `sudo -k` first: a cached sudo credential makes any `sudo -n` check succeed regardless of the rule. Do not use `sudo -l <command>` as proof, since it reports only whether a command is permitted, not whether it is passwordless.
 
 ## API Endpoints
 - `GET /list/{list_id}`: Retrieves the specified IMDb list ID (e.g., `ls031657324`) and returns a JSON list of movies.
@@ -52,5 +70,5 @@ The project is configured to run as a systemd service:
 - **Return Shape**: Preserve `scrape_imdb_list(list_id)` output as a list of `{"title", "year", "imdb_id", "poster_url"}` dictionaries. Missing year and poster values are `None`.
 - **Error Handling**: Raise clear `IMDbScraperError` exceptions for HTTP, JSON, GraphQL, pagination, and required metadata failures. Never silently return partial results.
 - **Caching**: Cache only complete successful results. Failed or partial scrapes must not replace an existing cache entry.
-- **Testing**: Run focused tests with `python3 -m pytest -q`. Live verification should isolate or bypass stale cache entries.
+- **Testing**: The `.venv` created by the installer holds runtime dependencies only, so `python3 -m pytest` fails there with `No module named pytest`. Install the test extras once with `.venv/bin/pip install -r requirements-dev.txt`, then run `.venv/bin/python -m pytest -q`. Live verification should isolate or bypass stale cache entries.
 - **Environment**: Configured to run under user `matt` in `/home/matt/gemini-projects/imdb_scraper_api`.
