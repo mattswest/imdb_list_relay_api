@@ -9,3 +9,5 @@ GEMINI.md
 CLAUDE.md
 cache/
 imdb-relay.service
+requirements-dev.txt
+tests/
