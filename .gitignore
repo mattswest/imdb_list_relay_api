@@ -6,5 +6,6 @@ venv/
 .env
 .pytest_cache/
 GEMINI.md
+CLAUDE.md
 cache/
 imdb-relay.service
