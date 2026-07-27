@@ -26,13 +26,6 @@ A lightweight relay server that retrieves IMDb movie lists through IMDb's GraphQ
    ```
    The server listens on port `9191` by default.
 
-4. **(Optional) Enable passwordless restarts**:
-   ```bash
-   sudo ./install-sudoers.sh
-   ```
-   Installs `/etc/sudoers.d/imdb-relay-restart`, allowing user `matt` to restart
-   this one unit without a password prompt.
-
 ## Updating
 
 The service imports the application once at startup, so pulling new code is not
